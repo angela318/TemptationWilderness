@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -8,20 +7,34 @@ public class WildernessGenerator : MonoBehaviour
     public Tilemap groundTilemap;
 
     [Header("Ground Tiles")]
-    public TileBase[] sandTiles;   // drag sand1–5 here in Inspector
+    public Sprite[] sandSprites;   // drag sand1–5 PNGs here in Inspector
 
     [Header("Map Settings")]
     public int mapWidth  = 40;
     public int mapHeight = 40;
 
-    // Sand tile weights — higher = appears more often.
-    // Index matches sandTiles array. Edit in Inspector.
     [Header("Tile Weights")]
     public float[] sandWeights = { 40f, 20f, 15f, 15f, 10f };
 
+    // Tile assets created at runtime from the sprites
+    Tile[] sandTiles;
+
     void Start()
     {
+        BuildTiles();
         Generate();
+    }
+
+    // Converts Sprite array to Tile assets at runtime
+    void BuildTiles()
+    {
+        sandTiles = new Tile[sandSprites.Length];
+        for (int i = 0; i < sandSprites.Length; i++)
+        {
+            Tile t = ScriptableObject.CreateInstance<Tile>();
+            t.sprite = sandSprites[i];
+            sandTiles[i] = t;
+        }
     }
 
     public void Generate()
@@ -39,14 +52,13 @@ public class WildernessGenerator : MonoBehaviour
         {
             for (int y = -halfH; y < halfH; y++)
             {
-                TileBase tile = PickWeighted(sandTiles, sandWeights);
+                Tile tile = PickWeighted(sandTiles, sandWeights);
                 groundTilemap.SetTile(new Vector3Int(x, y, 0), tile);
             }
         }
     }
 
-    // Returns a random tile using weighted probability.
-    TileBase PickWeighted(TileBase[] tiles, float[] weights)
+    Tile PickWeighted(Tile[] tiles, float[] weights)
     {
         float total = 0f;
         for (int i = 0; i < weights.Length; i++) total += weights[i];
