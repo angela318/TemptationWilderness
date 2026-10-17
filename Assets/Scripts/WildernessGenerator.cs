@@ -35,6 +35,15 @@ public class WildernessGenerator : MonoBehaviour
             t.sprite = sandSprites[i];
             sandTiles[i] = t;
         }
+
+        // Auto-resize weights to match sprite count if they don't already
+        if (sandWeights == null || sandWeights.Length != sandSprites.Length)
+        {
+            float[] newWeights = new float[sandSprites.Length];
+            for (int i = 0; i < newWeights.Length; i++)
+                newWeights[i] = (sandWeights != null && i < sandWeights.Length) ? sandWeights[i] : 10f;
+            sandWeights = newWeights;
+        }
     }
 
     public void Generate()
