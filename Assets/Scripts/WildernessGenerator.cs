@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic;
 
 public class WildernessGenerator : MonoBehaviour
 {
@@ -7,17 +8,38 @@ public class WildernessGenerator : MonoBehaviour
     public Tilemap groundTilemap;
 
     [Header("Ground Tiles")]
-    public Sprite[] sandSprites;   // drag sand1–5 PNGs here in Inspector
+    public Sprite[] sandSprites;
+
+    [Header("Obstacle Sprites")]
+    public Sprite[] obstacleSprites;
+
+    [Header("Decoration Sprites")]
+    public Sprite[] decorationSprites;
 
     [Header("Map Settings")]
     public int mapWidth  = 40;
     public int mapHeight = 40;
 
-    [Header("Tile Weights")]
-    public float[] sandWeights = { 40f, 20f, 15f, 15f, 10f };
+    [Header("Spawn Density")]
+    [Range(0f, 1f)] public float obstacleDensity   = 0.05f; // 5% of tiles
+    [Range(0f, 1f)] public float decorationDensity = 0.08f; // 8% of tiles
 
-    // Tile assets created at runtime from the sprites
-    Tile[] sandTiles;
+    [Header("Tile Weights")]
+    public float[] sandWeights = { 40f, 10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f, 10f };
+
+    // How much of the sprite height the collider covers (from bottom)
+    [Header("Obstacle Collider")]
+    [Range(0.1f, 1f)] public float colliderHeightRatio = 0.4f;
+
+    Tile[]     sandTiles;
+    Transform  obstaclesParent;
+    Transform  decorationsParent;
+
+    // Tracks occupied grid positions to avoid overlapping
+    HashSet<Vector2Int> occupied = new HashSet<Vector2Int>();
+
+    // Clear spawn zone radius around center (player start)
+    const int SAFE_RADIUS = 3;
 
     void Start()
     {
@@ -25,7 +47,102 @@ public class WildernessGenerator : MonoBehaviour
         Generate();
     }
 
-    // Converts Sprite array to Tile assets at runtime
+    public void Generate()
+    {
+        groundTilemap.ClearAllTiles();
+        occupied.Clear();
+
+        ClearChildren();
+
+        obstaclesParent   = new GameObject("Obstacles").transform;
+        decorationsParent = new GameObject("Decorations").transform;
+
+        FillGround();
+        ScatterObjects(obstacleSprites,   obstacleDensity,   obstaclesParent,   hasCollider: true);
+        ScatterObjects(decorationSprites, decorationDensity, decorationsParent, hasCollider: false);
+    }
+
+    void FillGround()
+    {
+        int halfW = mapWidth  / 2;
+        int halfH = mapHeight / 2;
+
+        for (int x = -halfW; x < halfW; x++)
+            for (int y = -halfH; y < halfH; y++)
+            {
+                Tile tile = PickWeighted(sandTiles, sandWeights);
+                groundTilemap.SetTile(new Vector3Int(x, y, 0), tile);
+            }
+    }
+
+    void ScatterObjects(Sprite[] sprites, float density, Transform parent, bool hasCollider)
+    {
+        if (sprites == null || sprites.Length == 0) return;
+
+        int count = Mathf.RoundToInt(mapWidth * mapHeight * density);
+        int halfW = mapWidth  / 2;
+        int halfH = mapHeight / 2;
+        int attempts = count * 10;
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector2Int cell = Vector2Int.zero;
+            bool found = false;
+
+            for (int a = 0; a < attempts; a++)
+            {
+                int x = Random.Range(-halfW, halfW);
+                int y = Random.Range(-halfH, halfH);
+                cell = new Vector2Int(x, y);
+
+                if (!occupied.Contains(cell) && !InSafeZone(cell))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) continue;
+
+            occupied.Add(cell);
+
+            Sprite sprite = sprites[Random.Range(0, sprites.Length)];
+            SpawnObject(sprite, cell, parent, hasCollider);
+        }
+    }
+
+    void SpawnObject(Sprite sprite, Vector2Int cell, Transform parent, bool hasCollider)
+    {
+        GameObject go = new GameObject(sprite.name);
+        go.transform.SetParent(parent);
+
+        // Centre the object on the tile, shift up slightly so base sits on ground
+        float tileSize = 1f;
+        go.transform.position = new Vector3(cell.x + tileSize / 2f, cell.y + tileSize / 2f, 0f);
+
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.sortingOrder = 1; // render above ground
+
+        if (hasCollider)
+        {
+            BoxCollider2D col = go.AddComponent<BoxCollider2D>();
+
+            // Collider covers only the bottom portion of the sprite
+            float spriteH = sprite.bounds.size.y;
+            float spriteW = sprite.bounds.size.x;
+            float colH    = spriteH * colliderHeightRatio;
+
+            col.size   = new Vector2(spriteW * 0.8f, colH);
+            col.offset = new Vector2(0f, -(spriteH / 2f - colH / 2f)); // anchor to bottom
+        }
+    }
+
+    bool InSafeZone(Vector2Int cell)
+    {
+        return Mathf.Abs(cell.x) <= SAFE_RADIUS && Mathf.Abs(cell.y) <= SAFE_RADIUS;
+    }
+
     void BuildTiles()
     {
         sandTiles = new Tile[sandSprites.Length];
@@ -36,35 +153,20 @@ public class WildernessGenerator : MonoBehaviour
             sandTiles[i] = t;
         }
 
-        // Auto-resize weights to match sprite count if they don't already
         if (sandWeights == null || sandWeights.Length != sandSprites.Length)
         {
-            float[] newWeights = new float[sandSprites.Length];
-            for (int i = 0; i < newWeights.Length; i++)
-                newWeights[i] = (sandWeights != null && i < sandWeights.Length) ? sandWeights[i] : 10f;
-            sandWeights = newWeights;
+            float[] w = new float[sandSprites.Length];
+            for (int i = 0; i < w.Length; i++)
+                w[i] = (sandWeights != null && i < sandWeights.Length) ? sandWeights[i] : 10f;
+            sandWeights = w;
         }
     }
 
-    public void Generate()
+    void ClearChildren()
     {
-        groundTilemap.ClearAllTiles();
-        FillGround();
-    }
-
-    void FillGround()
-    {
-        int halfW = mapWidth  / 2;
-        int halfH = mapHeight / 2;
-
-        for (int x = -halfW; x < halfW; x++)
-        {
-            for (int y = -halfH; y < halfH; y++)
-            {
-                Tile tile = PickWeighted(sandTiles, sandWeights);
-                groundTilemap.SetTile(new Vector3Int(x, y, 0), tile);
-            }
-        }
+        GameObject old;
+        old = GameObject.Find("Obstacles");   if (old) Destroy(old);
+        old = GameObject.Find("Decorations"); if (old) Destroy(old);
     }
 
     Tile PickWeighted(Tile[] tiles, float[] weights)
