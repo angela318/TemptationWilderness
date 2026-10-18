@@ -46,6 +46,8 @@ public class Scroll : MonoBehaviour
     public void HideGroundScroll()
     {
         sr.enabled = false;
+        foreach (Transform child in transform)
+            child.gameObject.SetActive(false);
     }
 
     public void Collect()

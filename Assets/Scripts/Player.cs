@@ -3,7 +3,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(SpriteRenderer))]
-[RequireComponent(typeof(CapsuleCollider2D))]
+[RequireComponent(typeof(CircleCollider2D))]
 public class Player : MonoBehaviour
 {
     [Header("Side Sprites")]
@@ -23,6 +23,10 @@ public class Player : MonoBehaviour
 
     [Header("Movement")]
     public float moveSpeed = 3f;
+
+    [Header("Map Bounds (match WildernessGenerator map size)")]
+    public float mapWidth  = 40f;
+    public float mapHeight = 40f;
 
     [Header("Animation")]
     public float walkFrameRate = 0.12f; // seconds per frame
@@ -71,6 +75,14 @@ public class Player : MonoBehaviour
         }
 
         rb.velocity = moveInput * moveSpeed;
+
+        // Clamp player inside map bounds
+        float halfW = mapWidth  / 2f;
+        float halfH = mapHeight / 2f;
+        Vector2 pos = rb.position;
+        pos.x = Mathf.Clamp(pos.x, -halfW, halfW);
+        pos.y = Mathf.Clamp(pos.y, -halfH, halfH);
+        rb.position = pos;
     }
 
     void UpdateFacing(Vector2 input)
