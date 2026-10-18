@@ -39,6 +39,7 @@ public class Player : MonoBehaviour
     bool           canMove    = true;
     int            walkFrame  = 0;
     float          walkTimer  = 0f;
+    Vector2        moveInput  = Vector2.zero;
 
     void Awake()
     {
@@ -53,17 +54,23 @@ public class Player : MonoBehaviour
     {
         if (isPicking) return;
 
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-        Vector2 input = new Vector2(h, v).normalized;
+        float h   = Input.GetAxisRaw("Horizontal");
+        float v   = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector2(h, v).normalized;
 
-        if (canMove)
-            rb.velocity = input * moveSpeed;
-        else
+        UpdateFacing(moveInput);
+        UpdateAnimation(moveInput);
+    }
+
+    void FixedUpdate()
+    {
+        if (isPicking || !canMove)
+        {
             rb.velocity = Vector2.zero;
+            return;
+        }
 
-        UpdateFacing(input);
-        UpdateAnimation(input);
+        rb.velocity = moveInput * moveSpeed;
     }
 
     void UpdateFacing(Vector2 input)
