@@ -64,9 +64,9 @@ public class Player : MonoBehaviour
         Vector2 input = new Vector2(h, v).normalized;
 
         if (canMove)
-            rb.linearVelocity = input * moveSpeed;
+            rb.velocity = input * moveSpeed;
         else
-            rb.linearVelocity = Vector2.zero;
+            rb.velocity = Vector2.zero;
 
         UpdateFacing(input);
         UpdateAnimation(input);
@@ -119,7 +119,7 @@ public class Player : MonoBehaviour
     IEnumerator PickupRoutine(Scroll scroll)
     {
         isPicking = true;
-        rb.linearVelocity = Vector2.zero;
+        rb.velocity = Vector2.zero;
 
         // Face toward the scroll — side if mostly horizontal, else down
         Vector2 diff = scroll.transform.position - transform.position;
