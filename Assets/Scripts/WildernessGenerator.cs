@@ -183,6 +183,16 @@ public class WildernessGenerator : MonoBehaviour
             sr.sprite       = scrollSprite;
             sr.sortingOrder = 1;
 
+            // Golden glow — same sprite, scaled up, tinted golden, behind scroll
+            GameObject glow = new GameObject("Glow");
+            glow.transform.SetParent(go.transform);
+            glow.transform.localPosition = Vector3.zero;
+            glow.transform.localScale    = Vector3.one * 1.6f;
+            SpriteRenderer glowSr = glow.AddComponent<SpriteRenderer>();
+            glowSr.sprite       = scrollSprite;
+            glowSr.color        = new Color(1f, 0.85f, 0f, 0.25f);
+            glowSr.sortingOrder = 0;
+
             CircleCollider2D col = go.AddComponent<CircleCollider2D>();
             col.isTrigger = true;
             col.radius    = 0.4f;
