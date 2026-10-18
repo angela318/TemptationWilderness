@@ -10,6 +10,9 @@ public class WildernessGenerator : MonoBehaviour
     [Header("Ground Tiles")]
     public Sprite[] sandSprites;
 
+    [Header("Scroll")]
+    public Sprite scrollSprite;
+
     [Header("Obstacle Sprites")]
     public Sprite[] obstacleSprites;
 
@@ -34,6 +37,7 @@ public class WildernessGenerator : MonoBehaviour
     Tile[]     sandTiles;
     Transform  obstaclesParent;
     Transform  decorationsParent;
+    Transform  scrollsParent;
 
     // Tracks occupied grid positions to avoid overlapping
     HashSet<Vector2Int> occupied = new HashSet<Vector2Int>();
@@ -56,10 +60,12 @@ public class WildernessGenerator : MonoBehaviour
 
         obstaclesParent   = new GameObject("Obstacles").transform;
         decorationsParent = new GameObject("Decorations").transform;
+        scrollsParent     = new GameObject("Scrolls").transform;
 
         FillGround();
         ScatterObjects(obstacleSprites,   obstacleDensity,   obstaclesParent,   hasCollider: true);
         ScatterObjects(decorationSprites, decorationDensity, decorationsParent, hasCollider: false);
+        SpawnScrolls();
     }
 
     void FillGround()
@@ -138,6 +144,53 @@ public class WildernessGenerator : MonoBehaviour
         }
     }
 
+    void SpawnScrolls()
+    {
+        if (scrollSprite == null) return;
+
+        int count    = GameController.instance != null ? GameController.instance.totalScrolls : 5;
+        int halfW    = mapWidth  / 2;
+        int halfH    = mapHeight / 2;
+        int attempts = count * 20;
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector2Int cell = Vector2Int.zero;
+            bool found = false;
+
+            for (int a = 0; a < attempts; a++)
+            {
+                int x = Random.Range(-halfW, halfW);
+                int y = Random.Range(-halfH, halfH);
+                cell = new Vector2Int(x, y);
+
+                if (!occupied.Contains(cell) && !InSafeZone(cell))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) continue;
+
+            occupied.Add(cell);
+
+            GameObject go = new GameObject("Scroll");
+            go.transform.SetParent(scrollsParent);
+            go.transform.position = new Vector3(cell.x + 0.5f, cell.y + 0.5f, 0f);
+
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite       = scrollSprite;
+            sr.sortingOrder = 1;
+
+            CircleCollider2D col = go.AddComponent<CircleCollider2D>();
+            col.isTrigger = true;
+            col.radius    = 0.4f;
+
+            go.AddComponent<Scroll>();
+        }
+    }
+
     bool InSafeZone(Vector2Int cell)
     {
         return Mathf.Abs(cell.x) <= SAFE_RADIUS && Mathf.Abs(cell.y) <= SAFE_RADIUS;
@@ -167,6 +220,7 @@ public class WildernessGenerator : MonoBehaviour
         GameObject old;
         old = GameObject.Find("Obstacles");   if (old) Destroy(old);
         old = GameObject.Find("Decorations"); if (old) Destroy(old);
+        old = GameObject.Find("Scrolls");     if (old) Destroy(old);
     }
 
     Tile PickWeighted(Tile[] tiles, float[] weights)
