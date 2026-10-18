@@ -31,6 +31,10 @@ public class Player : MonoBehaviour
     [Header("Animation")]
     public float walkFrameRate = 0.12f; // seconds per frame
 
+    [Header("Foot Collider")]
+    public Vector2 colliderOffset = new Vector2(0f, -0.25f);
+    public float   colliderRadius = 0.2f;
+
 
     // ── state ──────────────────────────────────────────────────────────────
     enum Direction { Down, Up, Side }
@@ -52,6 +56,10 @@ public class Player : MonoBehaviour
 
         rb.gravityScale   = 0;
         rb.freezeRotation = true;
+
+        CircleCollider2D col = GetComponent<CircleCollider2D>();
+        col.offset = colliderOffset;
+        col.radius = colliderRadius;
     }
 
     void Update()
@@ -64,6 +72,8 @@ public class Player : MonoBehaviour
 
         UpdateFacing(moveInput);
         UpdateAnimation(moveInput);
+
+        sr.sortingOrder = Mathf.RoundToInt(-transform.position.y * 10);
     }
 
     void FixedUpdate()

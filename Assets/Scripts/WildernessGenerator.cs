@@ -128,7 +128,7 @@ public class WildernessGenerator : MonoBehaviour
 
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = sprite;
-        sr.sortingOrder = 1; // render above ground
+        sr.sortingOrder = Mathf.RoundToInt(-go.transform.position.y * 10);
 
         if (hasCollider)
         {
@@ -187,10 +187,10 @@ public class WildernessGenerator : MonoBehaviour
             GameObject glow = new GameObject("Glow");
             glow.transform.SetParent(go.transform);
             glow.transform.localPosition = Vector3.zero;
-            glow.transform.localScale    = Vector3.one * 1.6f;
+            glow.transform.localScale    = Vector3.one * 1.4f;
             SpriteRenderer glowSr = glow.AddComponent<SpriteRenderer>();
             glowSr.sprite       = scrollSprite;
-            glowSr.color        = new Color(1f, 0.85f, 0f, 0.25f);
+            glowSr.color        = new Color(1f, 0.85f, 0f, 0.3f);
             glowSr.sortingOrder = 0;
 
             CircleCollider2D col = go.AddComponent<CircleCollider2D>();

@@ -30,6 +30,14 @@ public class Scroll : MonoBehaviour
         if (collected) return;
         float bob = Mathf.Sin(Time.time * bobSpeed) * bobHeight;
         transform.position = new Vector3(basePosition.x, basePosition.y + bob, basePosition.z);
+
+        int order = Mathf.RoundToInt(-transform.position.y * 10);
+        sr.sortingOrder = order;
+        foreach (Transform child in transform)
+        {
+            SpriteRenderer childSr = child.GetComponent<SpriteRenderer>();
+            if (childSr != null) childSr.sortingOrder = order - 1;
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
