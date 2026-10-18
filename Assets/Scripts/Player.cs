@@ -26,33 +26,26 @@ public class Player : MonoBehaviour
     [Header("Animation")]
     public float walkFrameRate = 0.12f; // seconds per frame
 
-    [Header("Scroll In Hand")]
-    public SpriteRenderer scrollInHand; // child object — assign in Inspector
-    public Sprite          scrollSprite;
-    public Vector2         scrollHandOffset = new Vector2(0.3f, 0.3f);
 
     // ── state ──────────────────────────────────────────────────────────────
     enum Direction { Down, Up, Side }
 
-    Rigidbody2D  rb;
+    Rigidbody2D    rb;
     SpriteRenderer sr;
-    Direction    facing      = Direction.Down;
-    bool         facingLeft  = false;
-    bool         isPicking   = false;
-    bool         canMove     = true;
-    int          walkFrame   = 0;
-    float        walkTimer   = 0f;
+    Direction      facing     = Direction.Down;
+    bool           facingLeft = false;
+    bool           isPicking  = false;
+    bool           canMove    = true;
+    int            walkFrame  = 0;
+    float          walkTimer  = 0f;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
 
-        rb.gravityScale  = 0;
+        rb.gravityScale   = 0;
         rb.freezeRotation = true;
-
-        if (scrollInHand != null)
-            scrollInHand.enabled = false;
     }
 
     void Update()
@@ -146,17 +139,13 @@ public class Player : MonoBehaviour
         {
             sr.sprite = frames[i];
 
-            // At frame index 2 (pick3): hide ground scroll, show in hand
+            // At frame index 2 (pick3): hide the ground scroll
             if (i == 2)
-            {
                 scroll.HideGroundScroll();
-                ShowScrollInHand();
-            }
 
             yield return new WaitForSeconds(0.1f);
         }
 
-        HideScrollInHand();
         FinishPickup(scroll);
     }
 
@@ -165,21 +154,6 @@ public class Player : MonoBehaviour
         scroll.Collect();
         isPicking = false;
         sr.sprite = IdleSprite();
-    }
-
-    void ShowScrollInHand()
-    {
-        if (scrollInHand == null) return;
-        scrollInHand.sprite  = scrollSprite;
-        scrollInHand.enabled = true;
-        float offsetX = facingLeft ? -scrollHandOffset.x : scrollHandOffset.x;
-        scrollInHand.transform.localPosition = new Vector3(offsetX, scrollHandOffset.y, 0f);
-    }
-
-    void HideScrollInHand()
-    {
-        if (scrollInHand != null)
-            scrollInHand.enabled = false;
     }
 
     // ── Sprite helpers ─────────────────────────────────────────────────────
