@@ -1,40 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    private Transform whale;
-    private Vector3 tempPos;
+    [Header("Target")]
+    public Transform target; // drag Player here in Inspector
 
-    [SerializeField]
-    private float maxX;
+    [Header("Follow Settings")]
+    public float smoothSpeed = 5f;
 
-    // Start is called before the first frame update
+    [Header("Map Bounds (match WildernessGenerator map size)")]
+    public float mapWidth  = 40f;
+    public float mapHeight = 40f;
+
+    Camera cam;
+
     void Start()
     {
-        whale = GameObject.FindWithTag("Whale").transform;
-        Debug.Log("Whale" + whale.position.x);
-        Debug.Log("Camera" + transform.position.x);
+        cam = GetComponent<Camera>();
     }
 
-    // Update is called once per frame
     void LateUpdate()
     {
+        if (target == null) return;
 
-        if (!whale)
-            return;
+        // Smooth follow
+        Vector3 desired = new Vector3(target.position.x, target.position.y, transform.position.z);
+        transform.position = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.deltaTime);
 
-        tempPos = transform.position;
-        tempPos.x = whale.position.x + 6;
+        // Clamp so camera never shows outside the map
+        float halfW = mapWidth  / 2f;
+        float halfH = mapHeight / 2f;
 
-        if (tempPos.x > maxX)
-            tempPos.x = maxX;
+        float camHalfH = cam.orthographicSize;
+        float camHalfW = cam.orthographicSize * cam.aspect;
 
-        transform.position = tempPos;
+        float clampedX = Mathf.Clamp(transform.position.x, -halfW + camHalfW, halfW - camHalfW);
+        float clampedY = Mathf.Clamp(transform.position.y, -halfH + camHalfH, halfH - camHalfH);
 
+        transform.position = new Vector3(clampedX, clampedY, transform.position.z);
     }
-
-
-
-} // class
+}
