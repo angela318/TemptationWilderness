@@ -20,21 +20,18 @@ public class Player : MonoBehaviour
     [Header("Up Sprites (optional)")]
     public Sprite   upStop;
     public Sprite[] upWalk;
+    public Sprite[] upPick;
 
     [Header("Movement")]
     public float moveSpeed = 3f;
 
     [Header("Map Bounds (match WildernessGenerator map size)")]
-    public float mapWidth  = 40f;
-    public float mapHeight = 40f;
+    public float mapWidth   = 40f;
+    public float mapHeight  = 40f;
+    public float topPadding = 0f; // sprite height above feet, prevents walking into void
 
     [Header("Animation")]
     public float walkFrameRate = 0.12f; // seconds per frame
-
-    [Header("Foot Collider")]
-    public Vector2 colliderOffset = new Vector2(0f, -0.25f);
-    public float   colliderRadius = 0.2f;
-
 
     // ── state ──────────────────────────────────────────────────────────────
     enum Direction { Down, Up, Side }
@@ -57,9 +54,13 @@ public class Player : MonoBehaviour
         rb.gravityScale   = 0;
         rb.freezeRotation = true;
 
+        // Zero friction so the player doesn't slide along obstacle edges
         CircleCollider2D col = GetComponent<CircleCollider2D>();
-        col.offset = colliderOffset;
-        col.radius = colliderRadius;
+        if (col != null)
+        {
+            PhysicsMaterial2D mat = new PhysicsMaterial2D { friction = 0f, bounciness = 0f };
+            col.sharedMaterial = mat;
+        }
     }
 
     void Update()
@@ -68,12 +69,13 @@ public class Player : MonoBehaviour
 
         float h   = Input.GetAxisRaw("Horizontal");
         float v   = Input.GetAxisRaw("Vertical");
+
         moveInput = new Vector2(h, v).normalized;
 
         UpdateFacing(moveInput);
         UpdateAnimation(moveInput);
 
-        sr.sortingOrder = Mathf.RoundToInt(-transform.position.y * 10);
+        sr.sortingOrder = 250 + Mathf.RoundToInt(-transform.position.y * 10);
     }
 
     void FixedUpdate()
@@ -91,7 +93,7 @@ public class Player : MonoBehaviour
         float halfH = mapHeight / 2f;
         Vector2 pos = rb.position;
         pos.x = Mathf.Clamp(pos.x, -halfW, halfW);
-        pos.y = Mathf.Clamp(pos.y, -halfH, halfH);
+        pos.y = Mathf.Clamp(pos.y, -halfH, halfH - topPadding);
         rb.position = pos;
     }
 
@@ -144,7 +146,7 @@ public class Player : MonoBehaviour
         isPicking = true;
         rb.velocity = Vector2.zero;
 
-        // Face toward the scroll — side if mostly horizontal, else down
+        // Face toward the scroll
         Vector2 diff = scroll.transform.position - transform.position;
         if (Mathf.Abs(diff.x) >= Mathf.Abs(diff.y))
         {
@@ -153,7 +155,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            facing = Direction.Down;
+            facing = diff.y > 0 ? Direction.Up : Direction.Down;
         }
 
         Sprite[] frames = PickFrames();
@@ -203,6 +205,7 @@ public class Player : MonoBehaviour
 
     Sprite[] PickFrames()
     {
+        if (facing == Direction.Up   && upPick   != null && upPick.Length   > 0) return upPick;
         if (facing == Direction.Down && downPick != null && downPick.Length > 0) return downPick;
         return sidePick;
     }

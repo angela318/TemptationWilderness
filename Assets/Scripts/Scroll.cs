@@ -31,7 +31,7 @@ public class Scroll : MonoBehaviour
         float bob = Mathf.Sin(Time.time * bobSpeed) * bobHeight;
         transform.position = new Vector3(basePosition.x, basePosition.y + bob, basePosition.z);
 
-        int order = Mathf.RoundToInt(-transform.position.y * 10);
+        int order = 250 + Mathf.RoundToInt(-transform.position.y * 10);
         sr.sortingOrder = order;
         foreach (Transform child in transform)
         {
