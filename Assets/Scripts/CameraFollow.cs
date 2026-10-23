@@ -13,6 +13,7 @@ public class CameraFollow : MonoBehaviour
     public float mapHeight = 40f;
 
     Camera cam;
+    bool   snapped = false;
 
     void Start()
     {
@@ -23,9 +24,17 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
-        // Smooth follow
         Vector3 desired = new Vector3(target.position.x, target.position.y, transform.position.z);
-        transform.position = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.deltaTime);
+
+        if (!snapped)
+        {
+            transform.position = desired;
+            snapped = true;
+        }
+        else
+        {
+            transform.position = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.deltaTime);
+        }
 
         // Clamp so camera never shows outside the map
         float halfW = mapWidth  / 2f;

@@ -1,11 +1,17 @@
 mergeInto(LibraryManager.library, {
-  GameOver: function (score) {
-    ReactUnityWebGL.GameOver(score);
+  SceneLoaded: function () {
+    if (typeof ReactUnityWebGL !== "undefined") {
+      ReactUnityWebGL.SceneLoaded();
+    }
   },
-  BreathingStatus: function (active) {
-    ReactUnityWebGL.BreathingStatus(active);
+  ScrollCollected: function (count, total) {
+    if (typeof ReactUnityWebGL !== "undefined") {
+      ReactUnityWebGL.ScrollCollected(count, total);
+    }
   },
-  FishCollected: function () {
-    ReactUnityWebGL.FishCollected();
+  AllScrollsCollected: function () {
+    if (typeof ReactUnityWebGL !== "undefined") {
+      ReactUnityWebGL.AllScrollsCollected();
+    }
   },
 });

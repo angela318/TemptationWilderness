@@ -807,19 +807,41 @@ MonoBehaviour:
     backSprite: {fileID: 21300000, guid: 18b1dd835e8da4e66aaf3a7e8db3556b, type: 3}
     count: 4
     detectionRadius: 2
-    fleeSpeed: 3.5
+    fleeSpeed: 3.7
+    oscillationSpeed: 5
+    oscillationAmplitude: 3
   - frontSprite: {fileID: 21300000, guid: b624fc51ad9274d1eabe41b309aaaf4e, type: 3}
     sideSprite: {fileID: 21300000, guid: 816d0255e78b04d3eb337bfa9545f96d, type: 3}
     backSprite: {fileID: 21300000, guid: 86b09664ee0ce45ce9ba0b4340f44889, type: 3}
-    count: 10
+    count: 1
     detectionRadius: 3
-    fleeSpeed: 2.9
+    fleeSpeed: 3.1
+    oscillationSpeed: 7
+    oscillationAmplitude: 4
   - frontSprite: {fileID: 21300000, guid: 5dc15bca835304650b53d7a52c203e54, type: 3}
     sideSprite: {fileID: 21300000, guid: ca4970eb420b7422eb17252266bb69db, type: 3}
     backSprite: {fileID: 21300000, guid: b43a6c25f4dd8481385372ae04b36a86, type: 3}
-    count: 10
+    count: 1
+    detectionRadius: 4.5
+    fleeSpeed: 3.2
+    oscillationSpeed: 15
+    oscillationAmplitude: 6
+  - frontSprite: {fileID: 21300000, guid: 18a255d4e44644ad9bd90c9edf16b8e1, type: 3}
+    sideSprite: {fileID: 21300000, guid: 07acf4ce20bfc47f5853bb13599575f4, type: 3}
+    backSprite: {fileID: 21300000, guid: df6540e8c0dfe48128d9fe918747abe1, type: 3}
+    count: 2
     detectionRadius: 4
-    fleeSpeed: 3.1
+    fleeSpeed: 3.3
+    oscillationSpeed: 6
+    oscillationAmplitude: 4
+  - frontSprite: {fileID: 21300000, guid: 0b3fea136416944aa94e09a38faf19b7, type: 3}
+    sideSprite: {fileID: 21300000, guid: 01e7ededa79034375aa879142f9b2e18, type: 3}
+    backSprite: {fileID: 21300000, guid: c811038f90e994181b47751acef5f6e7, type: 3}
+    count: 2
+    detectionRadius: 2
+    fleeSpeed: 4
+    oscillationSpeed: 4
+    oscillationAmplitude: 6
   decorationSprites:
   - {fileID: 21300000, guid: e23b2578f338a4016ab69e589c536290, type: 3}
   - {fileID: 21300000, guid: e73a795847d9746bb82e4bd0fa7b6735, type: 3}
