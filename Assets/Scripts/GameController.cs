@@ -5,6 +5,9 @@ public class GameController : MonoBehaviour
 {
     public static GameController instance;
 
+    [Header("Mobile Joystick")]
+    public Joystick joystick;
+
     [Header("Scroll Settings")]
     public int totalScrolls = 5;
 
@@ -52,6 +55,8 @@ public class GameController : MonoBehaviour
 #endif
     }
 
-    public void PauseGame()  { Time.timeScale = 0; }
-    public void ResumeGame() { Time.timeScale = 1; }
+    public void PauseGame()   { Time.timeScale = 0; }
+    public void ResumeGame()  { Time.timeScale = 1; }
+    public void ShowJoystick() { if (joystick != null) joystick.gameObject.SetActive(true); }
+
 }

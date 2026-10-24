@@ -25,6 +25,9 @@ public class Player : MonoBehaviour
     [Header("Movement")]
     public float moveSpeed = 3f;
 
+    [Header("Mobile Joystick (optional)")]
+    public Joystick joystick;
+
     [Header("Map Bounds (match WildernessGenerator map size)")]
     public float mapWidth   = 40f;
     public float mapHeight  = 40f;
@@ -67,8 +70,13 @@ public class Player : MonoBehaviour
     {
         if (isPicking) return;
 
-        float h   = Input.GetAxisRaw("Horizontal");
-        float v   = Input.GetAxisRaw("Vertical");
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        if (h == 0 && v == 0 && joystick != null)
+        {
+            h = joystick.Horizontal;
+            v = joystick.Vertical;
+        }
 
         moveInput = new Vector2(h, v).normalized;
 
@@ -99,13 +107,17 @@ public class Player : MonoBehaviour
 
     void UpdateFacing(Vector2 input)
     {
-        if (input.x != 0)
+        if (input.sqrMagnitude == 0) return;
+
+        if (Mathf.Abs(input.x) >= Mathf.Abs(input.y))
         {
             facing     = Direction.Side;
             facingLeft = input.x < 0;
         }
-        else if (input.y < 0) facing = Direction.Down;
-        else if (input.y > 0) facing = Direction.Up;
+        else
+        {
+            facing = input.y < 0 ? Direction.Down : Direction.Up;
+        }
     }
 
     void UpdateAnimation(Vector2 input)

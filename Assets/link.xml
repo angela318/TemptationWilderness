@@ -1,0 +1,8 @@
+<linker>
+  <assembly fullname="UnityEngine.UI">
+    <type fullname="*" preserve="all"/>
+  </assembly>
+  <assembly fullname="UnityEngine.EventSystems">
+    <type fullname="*" preserve="all"/>
+  </assembly>
+</linker>
